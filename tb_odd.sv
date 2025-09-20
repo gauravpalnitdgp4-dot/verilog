@@ -67,6 +67,13 @@ initial begin
     $display("Test 3: div_val = 7");
 
     //resetn = 0;
+    div_val = 1;
+    #20;
+    resetn = 1;
+    #150;
+    $display("Test 3.a: div_val = 1");
+
+    //resetn = 0;
     div_val = 4;
     #20;
     resetn = 1;

@@ -41,8 +41,10 @@ module odd_div (
     logic [6:0] half_div;
     logic odd_even;
     logic [7:0] div_val_lat;
+    logic cnt_en;
     assign half_div = (cnt == 0)? div_val[7:1]: div_val_lat[7:1]; // Integer division by 2
     assign odd_even = (cnt == 0)? div_val[0]: div_val_lat[0]; // 1 if odd, 0 if even
+    assign cnt_en = (div_val_lat > 1) ? 1'b1 : 1'b0;
     // For odd div_val, toggle1 toggles every div_val cycles
     // For even div_val, toggle1 toggles every div_val/2 cycles
     always_ff @(posedge clk or negedge resetn) begin
@@ -64,7 +66,12 @@ module odd_div (
             else if (((cnt == 0)|cnt == (half_div))  & odd_even == 1'b0) begin
                 toggle1 <= ~toggle1;
             end
-            cnt <= (cnt == div_val_lat - 1) ? 0 : cnt + 1;
+            if (cnt_en == 1'b1) begin
+                cnt <= (cnt == div_val_lat - 1) ? 0 : cnt + 1;
+            end
+            else begin
+                cnt <= 0;
+            end
         end
     end
     always_ff @(negedge clk or negedge resetn) begin
@@ -76,6 +83,6 @@ module odd_div (
             end
         end
     end
-assign clkout = (odd_even) ? (toggle1 ^ toggle2) : toggle1;
+assign clkout = (div_val_lat == 1)? clk: (div_val_lat[0]) ? (toggle1 ^ toggle2) : toggle1;
 endmodule
 
